@@ -1,0 +1,392 @@
+{
+  "name": "Процесс автоматизации с использованием систем искусственного интеллекта",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        832,
+        736
+      ],
+      "id": "41793c39-6d44-431f-8814-5e0b0528526f",
+      "name": "FLUX",
+      "credentials": {
+        "openRouterApi": {
+          "id": "EGRS24BgvZvcpDOR",
+          "name": "FLUX 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "rule": [
+            {
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "976d83bb-7e9e-4aab-9722-25a9e238164f",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.output.request_type }}",
+                    "rightValue": "генерация картинок"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "modelIndex": 2,
+              "conditions": {
+                "options": {
+                  "version": 2,
+                  "leftValue": "",
+                  "caseSensitive": true,
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "id": "61d58197-db59-4cd7-bc41-bbeaf5e7b069",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.output.request_type }}",
+                    "rightValue": "обычный"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        }
+      },
+      "id": "a677d1b2-10d4-4aeb-be8e-1d35a46645b0",
+      "name": "Выбор моделей",
+      "type": "@n8n/n8n-nodes-langchain.modelSelector",
+      "position": [
+        816,
+        528
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Ты - нейросеть, используемая в блоке моей программы на n8n.\nТвоя задача — классифицировать тип запроса, который ты получаете на входе.\nТы должен предоставить следующие выходные данные:\n- обычный: если это обычный текстовый запрос с целью получения информации (общий запрос)\n- генерация картинок: если это запрос, связанный с генерации картинкок, фотографий"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "id": "749c1d15-a801-4bf3-86ec-5a01ade82b09",
+      "name": "Тип запроса",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        464,
+        304
+      ],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        480,
+        528
+      ],
+      "id": "f1bec64e-1271-417f-be1b-c56fc1454ea8",
+      "name": "Нейросеть",
+      "credentials": {
+        "openRouterApi": {
+          "id": "ehkFUw2gYjtMvFig",
+          "name": "NVIDIA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"request_type\": {\n\t\t\t\"type\": \"string\"\n\t\t}\n\t}\n}"
+      },
+      "id": "a49494c7-a7fa-4c7d-8d62-074059b06fbd",
+      "name": "Структурирование выходных данных",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        608,
+        528
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "baa35d41-24cc-477e-9bd3-4b9c7c855eed",
+      "name": "Чат",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "position": [
+        240,
+        304
+      ],
+      "webhookId": "56b65a7f-0698-4e99-81eb-fd87e0cb5bfa",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Чат').item.json.chatInput }}",
+        "options": {
+          "returnIntermediateSteps": true
+        }
+      },
+      "id": "2de46ff5-2147-490c-b639-2ef12bc2403b",
+      "name": "ИИ Агент",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        832,
+        304
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        960,
+        736
+      ],
+      "id": "0a05e134-8581-4bba-a5c7-0b76f9b7d68f",
+      "name": "Nemotron 2",
+      "credentials": {
+        "openRouterApi": {
+          "id": "ehkFUw2gYjtMvFig",
+          "name": "NVIDIA"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ff39abc1-fbe8-4c0f-84ed-22838b7dc99b",
+              "leftValue": "={{ $json.output.request_type }}",
+              "rightValue": "генерация картинок",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1184,
+        304
+      ],
+      "id": "18fa5ef7-fdda-49ba-8331-5dac1eb4403a",
+      "name": "Если"
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": " ",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1408,
+        208
+      ],
+      "id": "37549db7-4e2c-435e-90b7-8dbb7f4da753",
+      "name": "Отправить фото",
+      "webhookId": "6be289fe-917c-4fb6-af39-0eeba67fb629",
+      "credentials": {
+        "telegramApi": {
+          "id": "owiMEOQlweCa5eeh",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": " ",
+        "text": " ",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1408,
+        400
+      ],
+      "id": "f15318f7-3ebd-4a6d-9492-d6ac2e80dc39",
+      "name": "Отправить текстовое сообщение",
+      "webhookId": "b96f1892-38b3-4173-97ec-fcaada4b6777",
+      "credentials": {
+        "telegramApi": {
+          "id": "owiMEOQlweCa5eeh",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "FLUX": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Выбор моделей",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Выбор моделей": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "ИИ Агент",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Тип запроса": {
+      "main": [
+        [
+          {
+            "node": "ИИ Агент",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Нейросеть": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Тип запроса",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Структурирование выходных данных": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Тип запроса",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Чат": {
+      "main": [
+        [
+          {
+            "node": "Тип запроса",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ИИ Агент": {
+      "main": [
+        [
+          {
+            "node": "Если",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nemotron 2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Выбор моделей",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Если": {
+      "main": [
+        [
+          {
+            "node": "Отправить фото",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Отправить текстовое сообщение",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "7d1be1c1-bc67-4878-b0b1-fbf7deef8edc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "937864fcc3fbf058c35c4e2b5f26cf44f0ae0e3cde1124b47c7712770004c06e"
+  },
+  "id": "K4rJG3ZvUgL9rbnv",
+  "tags": []
+}
